@@ -81,3 +81,45 @@ def test_gen_function_call_ia():
     
     output = compile_snippet(code)
     assert "ia_treinar(dados)" in output
+
+def test_gen_enquanto():
+    code = """algoritmo "While"
+    var x: inteiro
+    inicio
+    enquanto x < 10 faca
+        x <- x + 1
+    fimenquanto
+    fimalgoritmo"""
+    output = compile_snippet(code)
+    assert "while x<10:" in output
+
+def test_gen_leia_typing():
+    code = """algoritmo "LeiaType"
+    var n: inteiro
+    s: string
+    inicio
+    leia(n)
+    leia(s)
+    fimalgoritmo"""
+    
+    # We need to ensure var types are registered in the generator for this test
+    # compile_snippet creates a new Generator each time, so it's fresh.
+    output = compile_snippet(code)
+    
+    # Inteiro deve ser int(input())
+    assert "n = int(input())" in output
+    # String deve ser input()
+    assert "s = input()" in output
+
+def test_gen_boolean_logic():
+    code = """algoritmo "Bool"
+    var x, y, z: inteiro
+    inicio
+    se (x > 0) e (y < 10) ou (nao (z > 0)) entao
+        escreva("Boolean")
+    fim_se
+    fimalgoritmo"""
+    
+    output = compile_snippet(code)
+    # Check translation of operators
+    assert "if (x>0) and (y<10) or ( not (z>0)):" in output

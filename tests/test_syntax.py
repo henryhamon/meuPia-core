@@ -78,3 +78,15 @@ def test_syntax_error_invalid_var_block():
     parser = Parser(lexemes)
     with pytest.raises(SyntacticError):
         parser.parse()
+
+def test_syntax_nested_arrays():
+    code = [
+        'algoritmo "Matrix"',
+        'var m: inteiro',
+        'inicio',
+        '   m <- [[1,2], [3,4]]',
+        'fimalgoritmo'
+    ]
+    lexemes = mock_lexemes(code)
+    parser = Parser(lexemes)
+    parser.parse()
