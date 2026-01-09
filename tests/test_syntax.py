@@ -1,0 +1,80 @@
+import pytest
+from analyzers.syntax_analyzer import Parser, SyntacticError
+from analyzers.lexical_analyzer import scan_line
+
+def mock_lexemes(code_lines):
+    all_lexemes = []
+    for i, line in enumerate(code_lines):
+        line_clean, lexemes = scan_line(line, i+1)
+        all_lexemes.extend(lexemes)
+    return all_lexemes
+
+def test_syntax_full_algorithm():
+    code = [
+        'algoritmo "Teste"',
+        'var x, y : inteiro',
+        'inicio',
+        '   x <- 10',
+        '   y <- 20',
+        '   escreva(x + y)',
+        'fimalgoritmo'
+    ]
+    lexemes = mock_lexemes(code)
+    parser = Parser(lexemes)
+    # expect no exception
+    parser.parse()
+
+def test_syntax_loop():
+    code = [
+        'algoritmo "Loop"',
+        'inicio',
+        '   para i de 1 ate 10 faca',
+        '       escreva(i)',
+        '   fim_para',
+        'fimalgoritmo'
+    ]
+    lexemes = mock_lexemes(code)
+    parser = Parser(lexemes)
+    parser.parse()
+
+def test_syntax_conditional():
+    code = [
+        'algoritmo "Cond"',
+        'inicio',
+        '   se x > 10 entao',
+        '       escreva("Maior")',
+        '   senao',
+        '       escreva("Menor")',
+        '   fim_se',
+        'fimalgoritmo'
+    ]
+    lexemes = mock_lexemes(code)
+    parser = Parser(lexemes)
+    parser.parse()
+
+def test_syntax_error_missing_tokens():
+    code = [
+        'algoritmo "Erro"',
+        'inicio',
+        '   se x > 10', # Missing entao
+        '       escreva("Erro")',
+        '   fim_se',
+        'fimalgoritmo'
+    ]
+    lexemes = mock_lexemes(code)
+    parser = Parser(lexemes)
+    with pytest.raises(SyntacticError) as excinfo:
+        parser.parse()
+    assert 'Esperado "então"' in str(excinfo.value)
+
+def test_syntax_error_invalid_var_block():
+    code = [
+        'algoritmo "ErroVar"',
+        'var x', # Missing type
+        'inicio',
+        'fimalgoritmo'
+    ]
+    lexemes = mock_lexemes(code)
+    parser = Parser(lexemes)
+    with pytest.raises(SyntacticError):
+        parser.parse()
