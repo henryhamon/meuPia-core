@@ -74,7 +74,27 @@ class SemanticAnalyzer:
         lexeme = self.current_lexeme()
 
         # Check declaration
-        if not self.is_variable_declared(lexeme):
+        is_function_call = False
+        if self.pos + 1 < len(self.lexeme_pairs):
+            if self.lexeme_pairs[self.pos + 1]['token'] == TokenEnum.PARAB.name:
+                is_function_call = True
+
+        allowed_funcs = [
+            'ia_treinar', 'ia_prever', 'ia_definir_dados',
+            'ksp_conectar', 'ksp_obter_altitude', 'ksp_propulsao'
+        ]
+
+        if is_function_call:
+            if lexeme not in allowed_funcs:
+                 # Optional: warn or error about unknown function.
+                 # For now, let's allow it or error? 
+                 # Let's error if strictly not in allowed list? 
+                 # Or just skip check implies we trust it exists in runtime?
+                 # Project requirement: "O aluno escreve em Portugol... nós geramos um Python".
+                 # Better to error on typos.
+                 code_index = self.current_code_index()
+                 raise SemanticError(f'Undeclared function "{lexeme}" used at line {code_index}.')
+        elif not self.is_variable_declared(lexeme):
           code_index = self.current_code_index()
           raise SemanticError(f'Undeclared variable "{lexeme}" used at line {code_index}.')
 

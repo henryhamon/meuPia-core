@@ -87,6 +87,8 @@ class Parser:
       self.grammar_command_leia()
     elif self.check_token(TokenEnum.SE):
       self.grammar_command_se()
+    elif self.check_token(TokenEnum.ENQUANTO):
+      self.grammar_command_enquanto()
     elif self.check_token(TokenEnum.PARA):
       self.grammar_command_para()
     else:
@@ -139,16 +141,8 @@ class Parser:
 
     # Termos suportados por escreva
     # Nota: Poderíamos expandir aqui para aceitar expressões completas no futuro
-    if self.check_token(TokenEnum.ID):
-      self.expect_token(TokenEnum.ID)
-    elif self.check_token(TokenEnum.NUMINT):
-      self.expect_token(TokenEnum.NUMINT)
-    elif self.check_token(TokenEnum.STRING):
-      self.expect_token(TokenEnum.STRING)
-    else:
-      lexeme = self.current_lexeme()
-      code_index = self.current_code_index()
-      raise SyntacticError(f'Valor inesperado no comando escreva: "{lexeme}" na linha {code_index}')
+    # Termos suportados por escreva
+    self.grammar_arithmetic_expression()
 
     self.expect_token(TokenEnum.PARFE)
 
@@ -180,16 +174,36 @@ class Parser:
 
     self.expect_token(TokenEnum.FIMSE)
 
+  def grammar_command_enquanto(self):
+    self.expect_token(TokenEnum.ENQUANTO)
+    self.grammar_logic_expression()
+    
+    if self.check_token(TokenEnum.FACA):
+        self.expect_token(TokenEnum.FACA)
+    
+    while not self.check_token(TokenEnum.FIMENQUANTO):
+      self.statement()
+
+    self.expect_token(TokenEnum.FIMENQUANTO)
+
   def grammar_command_para(self):
     self.expect_token(TokenEnum.PARA)
     self.expect_token(TokenEnum.ID)
+    
+    # Sintaxe: PARA id DE inicio ATE fim [FACA]
+    self.expect_token(TokenEnum.DE)
+    self.grammar_arithmetic_term() # Inicio (valor ou id)
+    
     self.expect_token(TokenEnum.ATE)
-    self.expect_token(TokenEnum.NUMINT)
-
+    self.grammar_arithmetic_term() # Fim definition
+    
     # Passo opcional
     if self.check_token(TokenEnum.PASSO):
       self.expect_token(TokenEnum.PASSO)
-      self.expect_token(TokenEnum.NUMINT)
+      self.grammar_arithmetic_term() # Passo value
+
+    if self.check_token(TokenEnum.FACA):
+        self.expect_token(TokenEnum.FACA)
 
     while not self.check_token(TokenEnum.FIMPARA):
       self.statement()
@@ -208,9 +222,14 @@ class Parser:
 
   def grammar_arithmetic_term(self):
     if self.check_token(TokenEnum.ID):
-      self.expect_token(TokenEnum.ID)
+      if self.peek_next_token() == TokenEnum.PARAB.name:
+        self.grammar_function_call()
+      else:
+        self.expect_token(TokenEnum.ID)
     elif self.check_token(TokenEnum.NUMINT):
       self.expect_token(TokenEnum.NUMINT)
+    elif self.check_token(TokenEnum.STRING):
+      self.expect_token(TokenEnum.STRING)
     elif self.check_token(TokenEnum.PARAB):
       self.expect_token(TokenEnum.PARAB)
       self.grammar_arithmetic_expression()
