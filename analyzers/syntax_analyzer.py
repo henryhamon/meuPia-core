@@ -28,6 +28,11 @@ class Parser:
 
     return self.lexeme_pairs[-1].get('code_index', 'unknown')
 
+  def peek_next_token(self) -> str:
+    if self.pos + 1 < len(self.lexeme_pairs):
+      return self.lexeme_pairs[self.pos + 1]['token']
+    return ''
+
   def expect_token(self, expected: TokenEnum):
     if self.current_token() == expected.name:
       self.pos += 1
@@ -35,7 +40,7 @@ class Parser:
     
     lexeme = self.current_lexeme()
     code_index = self.current_code_index()
-    raise SyntacticError(f'Expected "{expected.value}", got "{lexeme}" at line {code_index}')
+    raise SyntacticError(f'Esperado "{expected.value}", encontrado "{lexeme}" na linha {code_index}')
   
   def check_token(self, expected: TokenEnum) -> bool:
     return self.current_token() == expected.name
@@ -60,11 +65,22 @@ class Parser:
     if self.pos < len(self.lexeme_pairs):
       extra_lexeme = self.current_lexeme()
       code_index = self.current_code_index()
-      raise SyntacticError(f'Unexpected code after "fimalgoritmo": "{extra_lexeme}" at line {code_index}')
+      raise SyntacticError(f'Código inesperado após "fimalgoritmo": "{extra_lexeme}" na linha {code_index}')
 
   def statement(self):
+    # --- ALTERAÇÃO PRINCIPAL ---
     if self.check_token(TokenEnum.ID):
-      self.grammar_var_assignment()
+      # Verifica o que vem depois do ID para decidir
+      next_tok = self.peek_next_token()
+      
+      if next_tok == TokenEnum.ATR.name:
+        self.grammar_var_assignment()
+      elif next_tok == TokenEnum.PARAB.name:
+        self.grammar_function_call()
+      else:
+        # Fallback para erro ou atribuição mal formada
+        self.grammar_var_assignment()
+
     elif self.check_token(TokenEnum.ESCREVA):
       self.grammar_command_escreva()
     elif self.check_token(TokenEnum.LEIA):
@@ -76,18 +92,35 @@ class Parser:
     else:
       lexeme = self.current_lexeme()
       code_index = self.current_code_index()
-      raise SyntacticError(f'Unexpected "{lexeme}" at line {code_index}')
+      raise SyntacticError(f'Token inesperado "{lexeme}" na linha {code_index}')
 
   # ----------------
-  # Grammars
+  # Gramáticas
   # ----------------
+  
+  # --- NOVA GRAMÁTICA: CHAMADA DE FUNÇÃO ---
+  def grammar_function_call(self):
+    self.expect_token(TokenEnum.ID)     # Nome da função (ex: ia_treinar)
+    self.expect_token(TokenEnum.PARAB)  # (
+    
+    # Se não fechar parenteses logo, temos argumentos
+    if not self.check_token(TokenEnum.PARFE):
+        self.grammar_arithmetic_expression() # Primeiro argumento
+        
+        # Enquanto houver vírgula, temos mais argumentos
+        while self.check_token(TokenEnum.COMMA):
+            self.expect_token(TokenEnum.COMMA)
+            self.grammar_arithmetic_expression()
+
+    self.expect_token(TokenEnum.PARFE)  # )
+
   def grammar_variable_block(self):
     self.expect_token(TokenEnum.VAR)
 
     while self.check_token(TokenEnum.ID):
       self.expect_token(TokenEnum.ID)
 
-      # Optional IDs separated by commas
+      # IDs opcionais separados por vírgula
       while self.check_token(TokenEnum.COMMA):
         self.expect_token(TokenEnum.COMMA)
         self.expect_token(TokenEnum.ID)
@@ -104,7 +137,8 @@ class Parser:
     self.expect_token(TokenEnum.ESCREVA)
     self.expect_token(TokenEnum.PARAB)
 
-    # Terms supported by escreva
+    # Termos suportados por escreva
+    # Nota: Poderíamos expandir aqui para aceitar expressões completas no futuro
     if self.check_token(TokenEnum.ID):
       self.expect_token(TokenEnum.ID)
     elif self.check_token(TokenEnum.NUMINT):
@@ -114,7 +148,7 @@ class Parser:
     else:
       lexeme = self.current_lexeme()
       code_index = self.current_code_index()
-      raise SyntacticError(f'Unexpected "{lexeme}" in escreva at line {code_index}')
+      raise SyntacticError(f'Valor inesperado no comando escreva: "{lexeme}" na linha {code_index}')
 
     self.expect_token(TokenEnum.PARFE)
 
@@ -122,13 +156,12 @@ class Parser:
     self.expect_token(TokenEnum.LEIA)
     self.expect_token(TokenEnum.PARAB)
 
-    # Terms supported by leia
     if self.check_token(TokenEnum.ID):
       self.expect_token(TokenEnum.ID)
     else:
       lexeme = self.current_lexeme()
       code_index = self.current_code_index()
-      raise SyntacticError(f'Unexpected "{lexeme}" in leia at line {code_index}')
+      raise SyntacticError(f'Esperado variável no comando leia, encontrado "{lexeme}" na linha {code_index}')
 
     self.expect_token(TokenEnum.PARFE)
   
@@ -153,7 +186,7 @@ class Parser:
     self.expect_token(TokenEnum.ATE)
     self.expect_token(TokenEnum.NUMINT)
 
-    # Optional "passo"
+    # Passo opcional
     if self.check_token(TokenEnum.PASSO):
       self.expect_token(TokenEnum.PASSO)
       self.expect_token(TokenEnum.NUMINT)
@@ -184,7 +217,8 @@ class Parser:
       self.expect_token(TokenEnum.PARFE)
     else:
       code_index = self.current_code_index()
-      raise SyntacticError(f'Expected identifier or value in expression at line {code_index}')
+      # Aqui entra um ponto de melhoria futuro: Suporte a listas [1,2] exigiria alteração no TokenEnum primeiro
+      raise SyntacticError(f'Esperado identificador ou valor na expressão, linha {code_index}')
 
   def grammar_logic_expression(self):
     self.grammar_logic_comparison()
@@ -211,7 +245,7 @@ class Parser:
         self.grammar_logic_operand()
       else:
         code_index = self.current_code_index()
-        raise SyntacticError(f'Missing comparison operator in logical expression at line {code_index}')
+        raise SyntacticError(f'Faltando operador de comparação na linha {code_index}')
 
   def grammar_logic_operand(self):
     if self.check_token(TokenEnum.ID):
@@ -226,4 +260,4 @@ class Parser:
       self.expect_token(TokenEnum.PARFE)
     else:
       code_index = self.current_code_index()
-      raise SyntacticError(f'Expected operand in logical expression at line {code_index}')
+      raise SyntacticError(f'Operando lógico inválido na linha {code_index}')
