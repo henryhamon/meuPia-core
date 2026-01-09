@@ -4,7 +4,7 @@ import analyzers.syntax_analyzer as syntax_analyzer
 import analyzers.semantic_analyzer as semantic_analyzer
 from analyzers.code_generator import CodeGenerator
 
-INPUT_FILE_NAME = 'input/teste_ia.por'
+INPUT_FILE_NAME = 'input/missao_ia.por'
 
 def main():
   try:
