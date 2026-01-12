@@ -8,4 +8,10 @@ setup(
     install_requires=[
         # Dependências do core (se houver)
     ],
+    entry_points={
+        'console_scripts': [
+            'mpgp=meuPia.tools.mpgp:main',
+            'meupia=meuPia.compiler:main',
+        ],
+    },
 )
