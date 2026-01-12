@@ -59,13 +59,13 @@ O **mPGP** (meuPiá Package Manager) facilita a instalação de módulos adicion
 
 ```bash
 # Listar plugins disponíveis
-mpm list
+mpgp liste
 
 # Instalar um plugin
-mpm install <nome_do_plugin>
+mpgp instale <nome_do_plugin>
 
 # Remover um plugin
-mpm remove <nome_do_plugin>
+mpgp remover <nome_do_plugin>
 
 ```
 
@@ -73,8 +73,8 @@ mpm remove <nome_do_plugin>
 
 | Módulo | Comando de Instalação | Descrição |
 | --- | --- | --- |
-| **Maker** | `mpm install maker` | Adiciona suporte a **IoT e Robótica**. Permite compilar Portugol para **ESP32/Pico** (MicroPython). |
-| **Espacial** | `mpm install espacial` | Adiciona suporte ao **Kerbal Space Program**. Permite controlar foguetes via kRPC. |
+| **Maker** | `mpgp instale maker` | Adiciona suporte a **IoT e Robótica**. Permite compilar Portugol para **ESP32/Pico** (MicroPython). |
+| **Espacial** | `mpgp instale espacial` | Adiciona suporte ao **Kerbal Space Program**. Permite controlar foguetes via kRPC. |
 
 ---
 
