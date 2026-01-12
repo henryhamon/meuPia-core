@@ -1,128 +1,131 @@
-# meuPiá – Portugol Inteligência Artificial
+# meuPiá Core – O Compilador Modular de Portugol Inteligência Artificial
 
 ![meuPia](assets/meuPia.png)
 
 ## 📖 Overview
 
-> **Nota:** Este projeto é um *fork* evolutivo do [`portugol-compiler`](https://github.com/LuanContarin/portugol-compiler), focado em interoperabilidade.
+> **Nota:** Este projeto é um *fork* evolutivo do [`portugol-compiler`](https://www.google.com/search?q=%5Bhttps://github.com/LuanContarin/portugol-compiler%5D(https://github.com/LuanContarin/portugol-compiler)), focado em interoperabilidade e modularização.
 
-**meuPiá** é um compilador (transpilador) de Portugol para Python projetado para o ensino de **Inteligência Artificial** e **Automação**.
+**meuPiá Core** é o motor central do ecossistema meuPiá. Ele é um compilador (transpilador) de Portugol para Python projetado para ser **extensível**.
 
-**meuPiá** fornece:
+Diferente de ferramentas educacionais fechadas, o meuPiá permite que você instale **plugins** para expandir as capacidades da linguagem. O Core fornece a infraestrutura de análise, geração de código e o gerenciador de pacotes, enquanto as funcionalidades específicas (como IoT ou Foguetes) são instaladas sob demanda.
 
-* **O Compilador:** Um analisador léxico, sintático e semântico robusto que traduz Portugol diretamente para scripts Python executáveis.
-* **A Runtime (Lib):** Wrappers nativos e simplificados para ocultar a complexidade de APIs avançadas, mantendo a simplicidade educacional.
-* **A Ponte:** Uma arquitetura que permite ao aluno ir do "Olá Mundo" ao "Treinamento de Rede Neural" sem trocar de linguagem.
+**meuPiá Core** fornece:
+
+* **O Compilador:** Analisadores léxico, sintático e semântico que traduzem Portugol para Python otimizado.
+* **mPGP (meuPiá Gerenciador de Pacotes):** Uma ferramenta de linha de comando integrada para instalar e gerenciar extensões oficiais.
+* **Sistema de Plugins:** Suporte nativo à diretiva `usar "nome_do_plugin"`, permitindo importação dinâmica de bibliotecas.
 
 ## ⚙️ How It Works
 
-O framework opera em uma arquitetura de três estágios:
+A arquitetura foi modernizada para suportar extensões:
 
-### 1. Analysis (O Legado Robusto)
+### 1. Analysis & Validation
 
-Baseado no excelente trabalho do `portugol-compiler`, o meuPiá realiza a análise léxica e sintática para garantir que o aluno escreveu um algoritmo válido, gerando uma Árvore Sintática e pares de lexemas.
+O compilador realiza a análise léxica e sintática completa, garantindo a integridade lógica do algoritmo escrito em Portugol.
 
-### 2. Code Generation (O Transpilador)
+### 2. Plugin-Aware Code Generation
 
-Diferente de um interpretador simples, o meuPiá possui um `CodeGenerator` que percorre a árvore sintática e escreve um arquivo `.py` equivalente, injetando automaticamente as dependências necessárias.
+O `CodeGenerator` identifica as diretivas `usar "..."` e injeta automaticamente as dependências corretas no código Python final, otimizando os imports para o ambiente de destino (seja PC ou Microcontrolador).
 
-### 3. The Runtime Wrappers (`lib/`)
+### 3. Runtime Modular
 
-Bibliotecas Python otimizadas (o "motor" do meuPiá) que são importadas automaticamente no código gerado:
-
-* **meupia_ml:** Encapsula `numpy` e `sklearn` para classificação e regressão.
-* **meupia_space:** Gerencia a conexão RPC com o Kerbal Space Program.
+O Core mantém apenas as bibliotecas essenciais. Funcionalidades complexas foram movidas para pacotes externos instaláveis via mPGP.
 
 ## 🚀 Installation
 
-```bash
-# 1. Clone o repositório
-git clone https://github.com/henryhamon/meuPia.git
-cd meuPia
+Para começar, instale o núcleo do sistema:
 
-# 2. Instale as dependências do Python
-pip install -r requirements.txt
-# (Requer krpc, scikit-learn, numpy)
+```bash
+# Clone o repositório
+git clone https://github.com/henryhamon/meuPia-core.git
+cd meuPia-core
+
+# Instale em modo editável (recomendado para dev)
+pip install -e .
 
 ```
+
+Isto instalará dois comandos no seu terminal:
+
+* `meupia`: O compilador.
+* `mpm`: O gerenciador de pacotes.
+
+## 📦 mPGP – Gerenciador de Pacotes
+
+O **mPGP** (meuPiá Package Manager) facilita a instalação de módulos adicionais sem que o aluno precise lidar com URLs complexas ou configurações de ambiente.
+
+### Comandos Básicos
+
+```bash
+# Listar plugins disponíveis
+mpm list
+
+# Instalar um plugin
+mpm install <nome_do_plugin>
+
+# Remover um plugin
+mpm remove <nome_do_plugin>
+
+```
+
+### Módulos Oficiais Disponíveis
+
+| Módulo | Comando de Instalação | Descrição |
+| --- | --- | --- |
+| **Maker** | `mpm install maker` | Adiciona suporte a **IoT e Robótica**. Permite compilar Portugol para **ESP32/Pico** (MicroPython). |
+| **Espacial** | `mpm install espacial` | Adiciona suporte ao **Kerbal Space Program**. Permite controlar foguetes via kRPC. |
+
+---
 
 ## 🛠️ Usage Examples
 
-### 1. Compilando um Algoritmo
+### 1. Compilando um Algoritmo Básico
 
-Você pode usar o meuPiá como uma biblioteca python ou executando o módulo diretamente.
-
-**Via linha de comando:**
 ```bash
-# A partir da raiz do projeto
-python -m meuPia.compiler path/to/input.por
+# Compila o arquivo e gera o Python equivalente na pasta output/
+meupia input/ola_mundo.por
+
 ```
 
-**Via Python:**
-```python
-from meuPia import compiler
+### 2. Usando Plugins (Ex: IoT/Maker)
 
-# Compila o arquivo input.por e salva o resultado em output_dir
-compiler.main('input.por', 'output_dir')
-```
-
-### 2. Exemplo: Inteligência Artificial
-
-Treinando um modelo simples para classificar frutas em Portugol:
+Após instalar o módulo maker (`mpm install maker`), você pode utilizá-lo no seu código:
 
 ```portugol
-algoritmo "classificador_frutas"
-var
-    dados, labels: inteiro
-    fruta_nova: inteiro
+algoritmo "PiscaLed"
+usar "maker"  // <--- Carrega o plugin instalado via mPGP
+
+var led: inteiro
 inicio
-    escreva("--- Iniciando IA ---")
+    led <- 2
+    iot_configurar_pino(led, "saida")
     
-    // [Peso, Textura] -> Treinamento
-    ia_definir_dados([[150, 0], [170, 0], [130, 1]], [0, 0, 1])
-    
+    enquanto verdadeiro faca
+        iot_ligar(led)
+        iot_esperar(1000)
+        iot_desligar(led)
+        iot_esperar(1000)
+    fimenquanto
+fimalgoritmo
+
+```
+
+### 3. Exemplo: Inteligência Artificial (Nativo)
+
+O suporte básico a IA continua integrado para facilitar o ensino de lógica de dados:
+
+```portugol
+algoritmo "classificador_simples"
+var dados: inteiro
+inicio
+    // O Core suporta vetores e matrizes nativamente
+    ia_definir_dados([[150, 0], [170, 0]], [0, 0])
     ia_criar_knn(3)
     ia_treinar()
-    
-    fruta_nova <- ia_prever([160, 0])
-    
-    se fruta_nova = 0 entao
-        escreva("É uma maçã!")
-    senao
-        escreva("É uma laranja!")
-    fim_se
 fimalgoritmo
 
 ```
-
-### 3. Exemplo: Automação Espacial (KSP)
-
-Controlando a telemetria de um foguete:
-
-```portugol
-algoritmo "lancamento_automatico"
-var
-    altitude: inteiro
-inicio
-    ksp_conectar()
-    altitude <- 0
-    
-    enquanto altitude < 10000 faca
-        altitude <- ksp_obter_altitude()
-        escreva("Altitude atual: ", altitude)
-        
-        se altitude > 5000 entao
-             ksp_ativar_estagio()
-        fim_se
-    fim_enquanto
-fimalgoritmo
-
-```
-
-
-## 🔍 Limitations
-
-* **Dependência do KSP:** Para funções espaciais, o jogo Kerbal Space Program deve estar rodando com o mod `kRPC` instalado.
 
 ## 🙌 Credits
 
