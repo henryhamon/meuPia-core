@@ -1,4 +1,4 @@
-# meuPiá Core – O Compilador Modular de Portugol Inteligência Artificial
+# meuPiá Core – O Compilador Modular de Portugol
 
 ![meuPia](assets/meuPia.png)
 
