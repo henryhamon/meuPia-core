@@ -6,6 +6,7 @@ import pkg_resources
 PLUGIN_REGISTRY = {
     "maker": "git+https://github.com/henryhamon/meuPia-maker.git",
     "espacial": "git+https://github.com/henryhamon/meuPia-espacial.git",
+    "ia": "git+https://github.com/henryhamon/meuPia-ia.git",
 }
 
 def install_plugin(plugin_name):

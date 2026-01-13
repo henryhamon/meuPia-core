@@ -66,11 +66,14 @@ def scan_line(line: str, lineNumber: int) -> tuple[str, List[str]]:
   token_lexem = []
 
   while i < len(line):
-    # Skip spaces
     if line[i].isspace():
       new_line_parts.append(' ')
       i += 1
       continue
+      
+    # Support for comments (//)
+    if i + 1 < len(line) and line[i:i+2] == '//':
+        break # Ignore the rest of the line
 
     match_found = False
     

@@ -133,8 +133,9 @@ def test_gen_plugin_import():
     output = compile_snippet(code)
     # Check that default lib is NOT imported
     assert "from meuPia.lib.meupia_libs import *" not in output
-    # Check that plugin lib IS imported
-    assert "from meuPia.lib.plugins.plugin_nlp import *" in output
+    # Check that plugin lib IS imported with new convention
+    assert "from meupia_nlp import *" in output
+    assert "except ImportError:" in output
 
 def test_gen_default_import():
     code = """algoritmo "Default"
@@ -142,5 +143,16 @@ def test_gen_default_import():
     fimalgoritmo"""
     
     output = compile_snippet(code)
-    # Check that default lib IS imported
-    assert "from meuPia.lib.meupia_libs import *" in output
+    # Check that default lib is NOT imported (since it was deleted)
+    assert "from meuPia.lib.meupia_libs import *" not in output
+
+def test_gen_plugin_import_ia():
+    code = """algoritmo "TesteIA"
+    usar "ia"
+    inicio
+    fimalgoritmo"""
+    
+    output = compile_snippet(code)
+    # Check that mapping is respected
+    assert "from meupia_ia.plugin_ia import *" in output
+    assert "except ImportError:" in output

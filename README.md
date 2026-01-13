@@ -75,6 +75,7 @@ mpgp remover <nome_do_plugin>
 | --- | --- | --- |
 | **Maker** | `mpgp instale maker` | Adiciona suporte a **IoT e Robótica**. Permite compilar Portugol para **ESP32/Pico** (MicroPython). |
 | **Espacial** | `mpgp instale espacial` | Adiciona suporte ao **Kerbal Space Program**. Permite controlar foguetes via kRPC. |
+| **IA** | `mpgp instale ia` | Adiciona suporte a **Data Science**. Traz algoritmos do Scikit-Learn para o Portugol. |
 
 ---
 
@@ -111,21 +112,7 @@ fimalgoritmo
 
 ```
 
-### 3. Exemplo: Inteligência Artificial (Nativo)
 
-O suporte básico a IA continua integrado para facilitar o ensino de lógica de dados:
-
-```portugol
-algoritmo "classificador_simples"
-var dados: inteiro
-inicio
-    // O Core suporta vetores e matrizes nativamente
-    ia_definir_dados([[150, 0], [170, 0]], [0, 0])
-    ia_criar_knn(3)
-    ia_treinar()
-fimalgoritmo
-
-```
 
 ## 🙌 Credits
 

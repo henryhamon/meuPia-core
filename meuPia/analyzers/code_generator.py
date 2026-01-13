@@ -47,17 +47,28 @@ class CodeGenerator:
             self.imports.append(plugin_name)
             self.advance() # "NOME_DO_PLUGIN"
         
-        # Gerar imports do Python baseados no plugin
-        if 'nlp' in self.imports:
-             # Se usar nlp, assumimos que ele substitui a lib padrao ou eh uma lib especifica
-             # A instrução diz: "Se nlp estiver... NAO importe lib.default_ml"
-             # Como o codigo original importava lib.meupia_libs, vamos assumir que essa eh a default
-             pass 
-        else:
-             self.add_line("from meuPia.lib.meupia_libs import *")
-             
+
+        # Mapeamento: "comando usar" -> "linha de import python"
+        PLUGIN_IMPORT_MAP = {
+            "ia": "from meupia_ia.plugin_ia import *",       # Caminho explícito para o novo padrão
+            "maker": "from meupia_maker.plugin_iot import *", # (Ajuste se necessário, ou mantenha genérico)
+            "espacial": "from meupia_espacial.plugin_ksp import *"
+        }
+
         for plugin in self.imports:
-            self.add_line(f"from meuPia.lib.plugins.plugin_{plugin} import *")
+            # Tenta pegar do mapa, se não existir, usa o padrão 'meupia_{plugin}'
+            import_stmt = PLUGIN_IMPORT_MAP.get(plugin, f"from meupia_{plugin} import *")
+            
+            self.add_line(f"try:")
+            self.indent_level += 1
+            self.add_line(f"{import_stmt}")
+            self.indent_level -= 1
+            self.add_line(f"except ImportError:")
+            self.indent_level += 1
+            # Usando 'mpgp instale' conforme nomenclatura do mpgp.py
+            self.add_line(f"print(\"Erro: O plugin '{plugin}' não está instalado. Execute: mpgp instale {plugin}\")")
+            self.add_line(f"sys.exit(1)")
+            self.indent_level -= 1
             
         self.add_line("")
         
